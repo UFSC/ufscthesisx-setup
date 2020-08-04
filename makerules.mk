@@ -507,22 +507,29 @@ import os
 import zipfile
 
 version = "${version}"
+version_prefix = "${version_prefix}".strip()
 if not version:
 	print( "Error: You need pass the release version. For example: make release version=1.1", end="@NEWNEWLINE@" )
 	exit(1)
 
-CURRENT_DIRECTORY = os.path.dirname( os.path.realpath( __file__ ) )
+CURRENT_DIRECTORY = os.path.dirname( os.path.abspath( __file__ ) )
 print( "Packing files on %s" % CURRENT_DIRECTORY, end="@NEWNEWLINE@" )
 
-file_names = []
+file_names = set()
 initial_file_names = [
 	"Makefile",
 	"build.bat",
 	"fc-portuges.def",
+	os.path.join("setup", "README.md"),
+	os.path.join("setup", ".gitignore"),
 	os.path.join("setup", "makefile.mk"),
-	os.path.join("setup", "ufscthesisx.sty"),
+	os.path.join("setup", "makerules.mk"),
+	os.path.join("setup", "abntex2.cls"),
+	os.path.join("setup", "remove_lang.py"),
+	os.path.join("setup", "ufscthesisx.cls"),
+	os.path.join("setup", "UFSC_sigla_fundo_claro.png"),
 	os.path.join("setup", "ufscthesisx.sublime-project"),
-	os.path.join("setup", "scripts", "timer_calculator.sh"),
+	os.path.join("setup", "_generic_timer.sh"),
 ]
 
 for direcory_name, dirs, files in os.walk(CURRENT_DIRECTORY, followlinks=True):
@@ -530,24 +537,35 @@ for direcory_name, dirs, files in os.walk(CURRENT_DIRECTORY, followlinks=True):
 	for filename in files:
 		filepath = os.path.join( direcory_name, filename )
 
-		if ".git" in filepath or not ( filepath.endswith( ".tex" )
-				or filepath.endswith( ".bib" )
-				or filepath.endswith( ".pdf" ) ):
+		if ".git" in filepath or not (
+					filepath.endswith( ".tex" )
+					or filepath.endswith( ".png" )
+					or filepath.endswith( ".jpg" )
+					or filepath.endswith( ".svg" )
+					or filepath.endswith( ".bib" )
+					or filepath.endswith( ".pdf" )
+				):
 			continue
 
-		file_names.append( filepath )
+		file_names.add( filepath )
 
 for filename in initial_file_names:
 	filepath = os.path.join( CURRENT_DIRECTORY, filename )
-	file_names.append( filepath )
+	file_names.add( filepath )
 
-zipfilepath = os.path.join( CURRENT_DIRECTORY, version + ".zip" )
+versionname = version if version.endswith( ".zip" ) else version + ".zip"
+versiondirectory = version_prefix
+
+zipfilepath = os.path.join( CURRENT_DIRECTORY, versionname )
 zipfileobject = zipfile.ZipFile(zipfilepath, mode="w")
-zipfilepathreduced = os.path.dirname( os.path.dirname( zipfilepath ) )
+zipfilepathreduced = os.path.dirname( zipfilepath )
+
+if not version_prefix:
+	zipfilepathreduced = os.path.dirname( zipfilepathreduced )
 
 try:
 	for filename in file_names:
-		relative_filename = filename.replace( zipfilepathreduced, "" )
+		relative_filename = filename.replace( zipfilepathreduced, versiondirectory )
 		print( relative_filename, end="@NEWNEWLINE@" )
 		zipfileobject.write( filename, relative_filename, compress_type=zipfile.ZIP_DEFLATED )
 

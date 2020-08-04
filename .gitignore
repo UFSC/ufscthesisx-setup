@@ -9,7 +9,7 @@
 /latexcache
 
 *.sublime-workspace
-*.pdf
+main.pdf
 
 # Latex files related
 *.brf

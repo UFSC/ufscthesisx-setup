@@ -53,13 +53,19 @@ endif
 # https://stackoverflow.com/questions/58367235/how-to-detect-if-the-makefile-silent-quiet-command-line-option
 # https://stackoverflow.com/questions/20582006/force-makefile-to-execute-script-after-building-any-target-just-before-exiting
 define DEFAULTTARGET :=
-	. ./setup/scripts/timer_calculator.sh
+	. ./setup/_generic_timer.sh
 
 	$(eval current_dir := $(shell pwd)) echo ${current_dir} > /dev/null
 	printf '\nCalling setup/makerules.mk "%s" %s\n' "${MAKECMDGOALS}" "${MAKEFLAGS}";
 
-	make -f setup/makerules.mk ${MAKECMDGOALS}
-	showTheElapsedSeconds "${current_dir}";
+	if make -f setup/makerules.mk ${MAKECMDGOALS};
+	then :
+		showTheElapsedSeconds "${current_dir}";
+	else
+	    exitcode="$$?"
+		showTheElapsedSeconds "${current_dir}";
+	    exit "$${exitcode}";
+	fi;
 endef
 
 %:

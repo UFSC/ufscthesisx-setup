@@ -130,7 +130,6 @@
 
 % Prove acesso a classe 'ufscthesisx'
 \ProvidesClass{setup/ufscthesisx}[2016/11/15 1.0.0 setup/ufscthesisx]
-\RequirePackage{ifthen}
 
 % How can I properly resolve relative paths in `\usepackage`?
 % https://tex.stackexchange.com/questions/123999/how-can-i-properly-resolve-relative-paths-in-usepackage
@@ -150,6 +149,85 @@
 % Now we'll execute any options passed in
 \ProcessOptions\relax
 \LoadClass{setup/abntex2}
+
+% https://github.com/evandrocoan/ufscthesisx-light/runs/915876094?check_suite_focus=true#step:5:658
+\RequirePackage{ifthen} % https://tex.stackexchange.com/questions/13866/why-is-the-ifthen-package-obsolete
+\RequirePackage{ifplatform}
+\RequirePackage{shellesc}
+\RequirePackage{xstring}
+
+% https://tex.stackexchange.com/questions/380799/warning-when-adding-package-minted
+\StrSubstitute{\jobname}{ }{_}[\mintedjobname]
+\StrSubstitute{\mintedjobname}{*}{_}[\mintedjobname]
+\StrSubstitute{\mintedjobname}{"}{}[\mintedjobname]
+\StrSubstitute{\mintedjobname}{'}{_}[\mintedjobname]
+
+\ifwindows
+  \providecommand{\DeleteFile}[2][]{%
+  \ifthenelse{\equal{#1}{}}%
+    {\IfFileExists{#2}{\ShellEscape{del #2}}{}}%
+    {\IfFileExists{#1/#2}{%
+    \StrSubstitute{#1}{/}{\@backslashchar}[\mintedwindir]
+    \ShellEscape{del \mintedwindir\@backslashchar #2}}{}}}
+\else
+  \providecommand{\DeleteFile}[2][]{%
+  \ifthenelse{\equal{#1}{}}%
+    {\IfFileExists{#2}{\ShellEscape{rm #2}}{}}%
+    {\IfFileExists{#1/#2}{\ShellEscape{rm #1/#2}}{}}}
+\fi
+
+\newboolean{AppMotherFuckerExists}
+\newread\mintedappexistsfile
+
+\newcommand{\TestAppMotherfuckerExists}[1]{
+  \ifwindows
+  \DeleteFile{\mintedjobname.aex}
+  \ShellEscape{@echo off
+    for \string^\@percentchar i in (#1.exe #1.bat #1.cmd)
+    do set > \mintedjobname.aex <nul: /p
+    x=\string^\@percentchar \string~$PATH:i>> \mintedjobname.aex}
+  %$ <- balance syntax highlighting
+  \immediate\openin\mintedappexistsfile\mintedjobname.aex
+  \expandafter\def\expandafter\@tmp@cr\expandafter{\the\endlinechar}
+  \endlinechar=-1\relax
+  \readline\mintedappexistsfile to \mintedapppathifexists
+  \endlinechar=\@tmp@cr
+  \ifthenelse{\equal{\mintedapppathifexists}{}}
+   {\AppMotherFuckerExistsfalse}
+   {\AppMotherFuckerExiststrue}
+  \immediate\closein\mintedappexistsfile
+  \DeleteFile{\mintedjobname.aex}
+  \else
+  \ShellEscape{which #1 > /dev/null 2>&1 && touch \mintedjobname.aex}
+  \IfFileExists{\mintedjobname.aex}
+    {\AppMotherFuckerExiststrue
+    \DeleteFile{\mintedjobname.aex}}
+    {\AppMotherFuckerExistsfalse}
+  \fi
+}
+
+\TestAppMotherfuckerExists{pygmentize}
+
+\ifAppMotherFuckerExists
+  % https://tex.stackexchange.com/questions/110292/testing-for-a-documentclass-option
+  % https://tex.stackexchange.com/questions/514711/package-minted-warning-unexpected-value-for-option-chapterminted-is-ignored
+  \@ifclasswith{setup/ufscthesisx}{chapter=TITLE}{
+  \begingroup
+  \def\x#1chapter=TITLE,#2\@nil{%
+    \endgroup\def\@classoptionslist{#1#2}%
+  }\expandafter\x\@classoptionslist\@nil
+  }{}
+
+  \@ifclasswith{setup/ufscthesisx}{section=TITLE}{
+  \begingroup
+  \def\x#1section=TITLE,#2\@nil{%
+    \endgroup\def\@classoptionslist{#1#2}%
+  }\expandafter\x\@classoptionslist\@nil
+  }
+\else
+  \PackageWarning{minted}{You must have `pygmentize' installed to use the minted package}
+  % \PackageError{minted}{You must have `pygmentize' installed to use the minted package}{Minted Error}
+\fi
 
 
 
@@ -1374,75 +1452,8 @@
   \fi%
 }
 
-% https://tex.stackexchange.com/questions/380799/warning-when-adding-package-minted
-\StrSubstitute{\jobname}{ }{_}[\mintedjobname]
-\StrSubstitute{\mintedjobname}{*}{_}[\mintedjobname]
-\StrSubstitute{\mintedjobname}{"}{}[\mintedjobname]
-\StrSubstitute{\mintedjobname}{'}{_}[\mintedjobname]
-
-\ifwindows
-  \providecommand{\DeleteFile}[2][]{%
-  \ifthenelse{\equal{#1}{}}%
-    {\IfFileExists{#2}{\ShellEscape{del #2}}{}}%
-    {\IfFileExists{#1/#2}{%
-    \StrSubstitute{#1}{/}{\@backslashchar}[\mintedwindir]
-    \ShellEscape{del \mintedwindir\@backslashchar #2}}{}}}
-\else
-  \providecommand{\DeleteFile}[2][]{%
-  \ifthenelse{\equal{#1}{}}%
-    {\IfFileExists{#2}{\ShellEscape{rm #2}}{}}%
-    {\IfFileExists{#1/#2}{\ShellEscape{rm #1/#2}}{}}}
-\fi
-
-\newboolean{AppMotherFuckerExists}
-\newread\mintedappexistsfile
-
-\newcommand{\TestAppMotherfuckerExists}[1]{
-  \ifwindows
-  \DeleteFile{\mintedjobname.aex}
-  \ShellEscape{@echo off
-    for \string^\@percentchar i in (#1.exe #1.bat #1.cmd)
-    do set > \mintedjobname.aex <nul: /p
-    x=\string^\@percentchar \string~$PATH:i>> \mintedjobname.aex}
-  %$ <- balance syntax highlighting
-  \immediate\openin\mintedappexistsfile\mintedjobname.aex
-  \expandafter\def\expandafter\@tmp@cr\expandafter{\the\endlinechar}
-  \endlinechar=-1\relax
-  \readline\mintedappexistsfile to \mintedapppathifexists
-  \endlinechar=\@tmp@cr
-  \ifthenelse{\equal{\mintedapppathifexists}{}}
-   {\AppMotherFuckerExistsfalse}
-   {\AppMotherFuckerExiststrue}
-  \immediate\closein\mintedappexistsfile
-  \DeleteFile{\mintedjobname.aex}
-  \else
-  \ShellEscape{which #1 > /dev/null 2>&1 && touch \mintedjobname.aex}
-  \IfFileExists{\mintedjobname.aex}
-    {\AppMotherFuckerExiststrue
-    \DeleteFile{\mintedjobname.aex}}
-    {\AppMotherFuckerExistsfalse}
-  \fi
-}
-
-\TestAppMotherfuckerExists{pygmentize}
 
 \ifAppMotherFuckerExists
-  % https://tex.stackexchange.com/questions/110292/testing-for-a-documentclass-option
-  % https://tex.stackexchange.com/questions/514711/package-minted-warning-unexpected-value-for-option-chapterminted-is-ignored
-  \@ifclasswith{setup/ufscthesisx}{chapter=TITLE}{
-  \begingroup
-  \def\x#1chapter=TITLE,#2\@nil{%
-    \endgroup\def\@classoptionslist{#1#2}%
-  }\expandafter\x\@classoptionslist\@nil
-  }{}
-
-  \@ifclasswith{setup/ufscthesisx}{section=TITLE}{
-  \begingroup
-  \def\x#1section=TITLE,#2\@nil{%
-    \endgroup\def\@classoptionslist{#1#2}%
-  }\expandafter\x\@classoptionslist\@nil
-  }
-
   % https://tex.stackexchange.com/questions/57353/how-to-get-caption-above-listing-with-minted
   % https://tex.stackexchange.com/questions/339931/latex-minted-package-using-custom-output-directory-build
   % https://tex.stackexchange.com/questions/223079/you-cant-use-a-prefix-with-charfb-error-when-importing-csv-into-latex
@@ -1472,11 +1483,8 @@
 
   % https://tex.stackexchange.com/questions/14166/red-box-drawn-around-question-mark-operator-in-minted-erlang-code
   \AtBeginEnvironment{code}{\renewcommand{\fcolorbox}[4][]{#4}}
+\else\fi
 
-\else
-  \PackageWarning{minted}{You must have `pygmentize' installed to use the minted package}
-  % \PackageError{minted}{You must have `pygmentize' installed to use the minted package}{Minted Error}
-\fi
 
 % Memoir class conflict with datetime
 % https://tex.stackexchange.com/questions/162353/memoir-class-conflict-with-datetime
@@ -1501,8 +1509,12 @@
 
 % https://tex.stackexchange.com/questions/45338/chngcntr-counterwithout-not-working
 % https://tex.stackexchange.com/questions/316230/number-listings-the-same-way-as-figures-and-tables
-\AtBeginDocument{\counterwithout{listing}{chapter}}
 \AtBeginDocument{\counterwithout{lstlisting}{chapter}}
+
+% https://tex.stackexchange.com/questions/557099/class-memoir-error-listing-is-not-a-counter
+\ifAppMotherFuckerExists
+  \AtBeginDocument{\counterwithout{listing}{chapter}}
+\else\fi
 
 % Permite tamanhos arbitrários para fontes Computer Modern (math warning)
 \RequirePackage{fix-cm}

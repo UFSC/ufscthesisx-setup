@@ -6,13 +6,18 @@ O modelo disponibilizado pela Biblioteca Universitária da UFSC em 2015,
 utiliza a `abntex` versão `0.8.2`, considerada muito antiga,
 portanto tratou-se de buscar a criação deste novo modelo que utiliza a classe `abntex2` versão `1.9.6`.
 
+Esse projeto não está vinculado a nenhum órgão da UFSC.
+
+Qualquer problema com a utilização ou com o modelo em si,
+basta criar um issue aqui no GitHub no nosso issue tracker: [issues](../../issues)
+
 
 ### Utilizando `git`
 
 No diretório do seu projeto faça um clone (recursivo) dos arquivos do repositório,
 em uma pasta chamada `setup` dentro do template da sua tese:
 ```bash
-git clone --recursive https://github.com/evandrocoan/ufscthesisx-setup setup
+git clone --recursive https://github.com/ufsc/ufscthesisx-setup setup
 ```
 
 Para usá-lo,
@@ -43,17 +48,25 @@ e em seu arquivo principal incluir o seguinte cabeçalho para carregar os pacote
 
 ### Mudanças
 
-Para ver as mudanças, acesse o histórico do `git` no endereço:
-1. https://github.com/evandrocoan/ufscthesisx-setup/commits/master
+Para ver as mudanças, acesse o histórico do `git` no endereço [commits/master](../../commits/master).
 
 Ou clone este repositório e execute seguinte comando do cliente git:
 ```bash
+# https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History
 git log
 ```
-1. https://git-scm.com/book/en/v2/Git-Basics-Viewing-the-Commit-History
 
 
 ## Compilação
+
+O jeito mais legal de compilar é executando um dos seguintes comandos:
+1. **`make clean`**
+1. **`make clean halt=1 debug=1`**
+1. **`make latex biber latex1`**
+1. **`make latex biber latex1 halt=1 debug=1`**
+1. **`make latex biber latex1 biber1 latex2`**
+1. **`make latex biber latex1 biber1 latex2 halt=1 debug=1`**
+1. **`...`**
 
 Se você quiser saber quais são todos os comandos de compilação disponíveis,
 basta chamar utilizar o comando `make help`. Exemplo:
@@ -70,83 +83,7 @@ $ make help
    make latex debug=1
    make thesis debug=1
 
- If you are using Windows Command Prompt `cmd.exe`, you must use the
- command like this:
-  make help
-  set "debug=1" && make
-  set "debug=1" && make latex
-  set "debug=1" && make thesis
-
- Use halt=1 to stop running on errors instead of continuing the compilation!
- Also, use debug=1 to halt on errors and fix the errors dynamically.
-
- Examples (Linux):
-   make halt=1
-   make latex halt=1
-   make thesis halt=1
-
-   make debug=1 halt=1
-   make latex debug=1 halt=1
-   make thesis debug=1 halt=1
-
- Examples (Windows):
-   set "halt=1" && make halt=1
-   set "halt=1" && make latex halt=1
-   set "halt=1" && make thesis halt=1
-
-   set "debug=1" && "halt=1" && make halt=1
-   set "debug=1" && "halt=1" && make latex halt=1
-   set "debug=1" && "halt=1" && make thesis halt=1
-
- Targets:
-   all        Call the `thesis` make rule
-   index      Build the main file with index pass
-   biber      Build the main file with bibliography pass
-   latex      Build the main file with no bibliography pass
-   pdflatex   The same as latex rule, i.e., an alias for it
-   latexmk    Build the main file with pdflatex biber pdflatex pdflatex
-              pdflatex makeindex biber pdflatex
-
-   thesis     Completely build the main file with minimum output logs
-   verbose    Completely build the main file with maximum output logs
-   clean      Remove all cache directories and generated pdf files
-   veryclean  Same as `clean`, but searches for all generated files outside
-              the cache directories.
-
-   release version=1.1
-       creates the zip file `1.1.zip` on the root of this project,
-       within all latex required files. This is useful to share or
-       public your thesis source files with others. If you are using
-       Windows Command Prompt `cmd.exe`, you must use this command like this:
-       set "version=1.1" && make release
-
-   remote     Runs the make command remotely on another machine by ssh.
-              This requires `passh` program installed. You can download it from:
-              https://github.com/clarkwang/passh
-
-       You can define the following parameters:
-       4. args - arguments to pass to the rsync program, see 'rsync --help'
-       3. rules - the rules/arguments to pass to the remote invocation of make
-       5. UFSCTHESISX_ROOT_DIRECTORY  - the directory to put the files, defaults to '~/LatexBuild'
-       1. UFSCTHESISX_REMOTE_PASSWORD - the remote machine SHH password, defaults to 'admin123'
-       2. UFSCTHESISX_REMOTE_ADDRESS  - the remote machine 'user@ipaddress', defaults to 'linux@192.168.0.222'
-
-     Example usage for Linux:
-       make remote rules="latex debug=1" &&
-              debug=1 &&
-              args="--delete"
-              UFSCTHESISX_ROOT_DIRECTORY=~/Downloads/Thesis &&
-              UFSCTHESISX_REMOTE_ADDRESS=linux@192.168.0.222 &&
-              UFSCTHESISX_REMOTE_PASSWORD=123 &&
-
-     Example usage for Windows:
-       set "rules=latex debug=1" &&
-              set "debug=1" &&
-              set "args=--delete" &&
-              set "UFSCTHESISX_ROOT_DIRECTORY=~/Downloads/Thesis" &&
-              set "UFSCTHESISX_REMOTE_ADDRESS=linux@192.168.0.222" &&
-              set "UFSCTHESISX_REMOTE_PASSWORD=123" &&
-              make remote
+...
 ```
 
 Caso você tenha problemas,
@@ -193,7 +130,4 @@ AUTORES OU TITULARES DE DIREITOS AUTORAIS SERÃO RESPONSÁVEIS POR QUALQUER RECL
 RESPONSABILIDADE, SEJA EM AÇÃO DE CONTRATO, DELITO OU DE OUTRA FORMA, DECORRENTE, DESTE OU
 RELACIONADO COM DOS ARQUIVOS DESTE REPOSITÓRIO OU O USO OU OUTRAS NEGOCIAÇÕES NO MODELO E SOFTWARE.
 ```
-
-
-
 
